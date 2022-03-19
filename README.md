@@ -55,7 +55,11 @@
 
    ![](http://bubble.seahubn.cn/mk/server2.jpg)
 
+   复制sendkey
+   
    ![](http://bubble.seahubn.cn/mk/server1.jpg)
+   
+   
 
 填充到上面的{sendkey}，配置文件便已经准备完成
 
