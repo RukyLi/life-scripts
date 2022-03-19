@@ -6,19 +6,20 @@ import time
 
 
 ## 这是server酱的
-# server_url = "https://sctapi.ftqq.com/SCT129842TTF3tOQ44d69Vc5A7LYzZZqBM.send"
+server_url = ""
 
 upgrade = {
-    "hyb":{
-        "shuqu":{
-            "从木叶开始逃亡":"dasdaa"
-        }
-    }
+    # "hyb":{
+    #     "shuqu":{
+    #         "从木叶开始逃亡":"dasdaa"
+    #     }
+    # }
 }
 
 file_name = "history.txt"
 log_name = "log.txt"
 
+sent_type = ""
 aggent_id = 0
 corp_secret = ""
 corp_id = ""
@@ -38,6 +39,12 @@ def create_md5(content):
     return md5_digest
 
 def send_message(_message,user_id): # 默认发送给自己
+
+    if sent_type == "Server":
+        response = requests.get(f'{server_url}?title=追的小说更新啦&desp={_message}')
+        data = json.loads(response.text)
+        print(data["data"]["error"] == "SUCCESS")
+        return data["data"]["error"] == "SUCCESS"
 
     response = requests.get(f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corp_id}&corpsecret={corp_secret}")
     data = json.loads(response.text)
@@ -81,20 +88,16 @@ def shu_qu_ge(url):
     change = {}
     text = find_content(url)
     soup = BeautifulSoup(text, features="lxml")
-    # print(soup)
     update = soup.find('div', class_="block_txt2").find_all('a')
     last = None
     for last in update:pass
-    # print(last)
     base_url = 'https://wap.shuquge.com'
     content_url = base_url + last['href']
-    # print(content_url)
     change["url"] = content_url
     fiction_content = find_content(content_url)
     fiction = BeautifulSoup(fiction_content, features="lxml")
     content = fiction.find("div", id="nr1")
     change["ready"] = len(content) > 50
-    # print(change)
     return change
 
 def query_new_chapter(url,type):
@@ -141,12 +144,16 @@ def init_data():
     global corp_secret
     global corp_id
     global boss_id
-    with open("base.json","r") as f:
+    global sent_type
+    global server_url
+    with open("base.json","r",encoding='UTF-8') as f:
         load_dic = dict(json.load(f))
         aggent_id = load_dic.get("aggent_id")
         corp_secret = load_dic.get("corp_secret")
         corp_id = load_dic.get("corp_id")
         boss_id = load_dic.get("boss_id")
+        sent_type = load_dic.get("send_type")
+        server_url = load_dic.get("server_url")
         return load_dic.get("data")
 
 def check_update_ready():
@@ -158,12 +165,10 @@ def check_update_ready():
         for origin_type,v in origin.items():
             print("源：" + str(upgrade))
             for name,url in v.items():
-                # print(name + "  " + url)
                 change = query_new_chapter(url, origin_type)
                 change["name"] = name
                 need = history_record(change,origin_type,taget_id)
                 change["need"] = need
-                # print(change)
                 if change.get("ready") == True and need == True:
                     message = name + "更新：" + change.get("url")
                     print("发送给：" + taget_id + "内容为：" + message)
@@ -177,19 +182,20 @@ def monitor():
     error = False
     while True:
         try:
-            #print(upgrade)
             check_update_ready()
             error = False
-            #print(upgrade)
         except Exception as e:
             if not error:
-                # send_message(str(e),boss_id)
-                print(str(e))
+                send_message(str(e),boss_id)
                 error = True
         time.sleep(15)
 
 
 if __name__ == '__main__':
-    # monitor()
-    init_data()
-    send_message("aaaa","hyb")
+    monitor()
+    # data_body = {
+    #     "title":11,
+    #     "desp":222
+    # }
+    # post = requests.get("https://sctapi.ftqq.com/SCT129842TdoN56kGcwUPRwkSX0cnJ4iLb.send?title=11&desp=222")
+    # print(post.text)

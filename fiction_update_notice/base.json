@@ -1,4 +1,6 @@
 {
+    "send_type": "Server",
+    "server_url": "https://sctapi.ftqq.com/SCT129842TdoN56kGcwUPRwkSX0cnJ4iLb.send",
     "boss_id": "用户id",
     "aggent_id": "应用id",
     "corp_secret": "应用secret",
@@ -6,7 +8,7 @@
     "data": [
 
         {
-            "user_id": "用户id1",
+            "user_id": "LiZhiHao",
             "base": {
                 "shuqu": {
                     "夜的命名术": "https://wap.shuquge.com/s/3478.html",
