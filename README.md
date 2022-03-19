@@ -13,6 +13,16 @@
 
 + 支持的推送方式：Server酱推送，企业微信推送(可以微信扫码企业微信插件转通知到微信，企业微信可卸载)
 
+**效果图**
+
++ Server酱
+
+  ![](http://bubble.seahubn.cn/mk/ft.jpeg)
+
++ 企业微信(微信端通知)
+
+  ![](http://bubble.seahubn.cn/mk/qy.jpeg)
+
 **Server酱推送方式**：(复制粘贴的话记得把注释删掉，json文件不能带注释)
 
 ```json
