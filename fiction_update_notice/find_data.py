@@ -164,7 +164,7 @@ def check_update_ready():
                 if change.get("ready") == True and need == True:
                     message = name + "更新：" + change.get("url")
                     # print("发送给：" + taget_id + "内容为：" + message)
-                    send_message(message,taget_id)
+                    send_message(message,taget_id,server_url)
                     do_log([],message)
                 change_list.append(change)
             # print("后：" + str(upgrade))
