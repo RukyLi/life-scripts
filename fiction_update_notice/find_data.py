@@ -5,8 +5,6 @@ import json
 import time
 
 
-## 这是server酱的
-server_url = ""
 
 upgrade = {}
 
@@ -32,7 +30,7 @@ def create_md5(content):
     md5_digest = new_md5.hexdigest()
     return md5_digest
 
-def send_message(_message,user_id): # 默认发送给自己
+def send_message(_message,user_id,server_url): # 默认发送给自己
 
     if sent_type == "Server":
         response = requests.get(f'{server_url}?title=追的小说更新啦&desp={_message}')
@@ -72,7 +70,7 @@ def bi_qu_ge(url):
     fiction_content = find_content(content_url)
     fiction = BeautifulSoup(fiction_content,features="lxml")
     content = fiction.find("div",id="content")
-    change["ready"] = len(content) > 50
+    change["ready"] = len(content) > 100
     return change
 
 def shu_qu_ge(url):
@@ -147,7 +145,6 @@ def init_data():
         corp_id = load_dic.get("corp_id")
         boss_id = load_dic.get("boss_id")
         sent_type = load_dic.get("send_type")
-        server_url = load_dic.get("server_url")
         return load_dic.get("data")
 
 def check_update_ready():
@@ -156,6 +153,7 @@ def check_update_ready():
     for user in data:
         origin = user.get("base")
         taget_id = user.get("user_id")
+        server_url = user.get("server_url")
         for origin_type,v in origin.items():
             # print("源：" + str(upgrade))
             for name,url in v.items():
