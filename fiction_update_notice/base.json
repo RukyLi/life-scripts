@@ -1,0 +1,28 @@
+{
+    "boss_id": "用户id",
+    "aggent_id": "应用id",
+    "corp_secret": "应用secret",
+    "corp_id": "企业id",
+    "data": [
+
+        {
+            "user_id": "用户id1",
+            "base": {
+                "shuqu": {
+                    "夜的命名术": "https://wap.shuquge.com/s/3478.html",
+                    "轮回乐园": "https://wap.shuquge.com/s/73988.html",
+                    "恐怖复苏": "https://wap.shuquge.com/s/83354.html"
+                }
+            }
+        },
+        {
+            "user_id": "用户id2",
+            "base": {
+                "shuqu": {
+                    "从木叶开始逃亡": "https://wap.shuquge.com/s/134509.html"
+                }
+            }
+        }
+
+    ]
+}
