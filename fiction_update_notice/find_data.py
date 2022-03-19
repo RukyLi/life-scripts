@@ -8,17 +8,11 @@ import time
 ## 这是server酱的
 server_url = ""
 
-upgrade = {
-    # "hyb":{
-    #     "shuqu":{
-    #         "从木叶开始逃亡":"dasdaa"
-    #     }
-    # }
-}
+upgrade = {}
 
 file_name = "history.txt"
 log_name = "log.txt"
-
+base_local = "base.json"
 sent_type = ""
 aggent_id = 0
 corp_secret = ""
@@ -43,7 +37,6 @@ def send_message(_message,user_id): # 默认发送给自己
     if sent_type == "Server":
         response = requests.get(f'{server_url}?title=追的小说更新啦&desp={_message}')
         data = json.loads(response.text)
-        print(data["data"]["error"] == "SUCCESS")
         return data["data"]["error"] == "SUCCESS"
 
     response = requests.get(f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corp_id}&corpsecret={corp_secret}")
@@ -71,7 +64,6 @@ def bi_qu_ge(url):
     text = find_content(url)
     soup = BeautifulSoup(text, features="lxml")
     update = soup.find('div', id="info").find("a", attrs={"target": "_blank"})
-    print(update)
     title_md5 = create_md5(update.text)
     change["md5"] = title_md5
     base_url = 'https://www.biduoxs.com'
@@ -81,7 +73,6 @@ def bi_qu_ge(url):
     fiction = BeautifulSoup(fiction_content,features="lxml")
     content = fiction.find("div",id="content")
     change["ready"] = len(content) > 50
-    print(change)
     return change
 
 def shu_qu_ge(url):
@@ -97,7 +88,7 @@ def shu_qu_ge(url):
     fiction_content = find_content(content_url)
     fiction = BeautifulSoup(fiction_content, features="lxml")
     content = fiction.find("div", id="nr1")
-    change["ready"] = len(content) > 50
+    change["ready"] = len(content) > 100
     return change
 
 def query_new_chapter(url,type):
@@ -112,8 +103,11 @@ def history_record(change,origin_type,taget_id):
     ready = change.get("ready")
     name = change.get("name")
 
-    if upgrade.get(taget_id) is None or upgrade.get(taget_id).get(origin_type) is None:
-        return False
+    if upgrade.get(taget_id) is None:
+        upgrade[taget_id] = {}
+        upgrade[taget_id][origin_type] = {}
+    if upgrade.get(taget_id).get(origin_type) is None:
+        upgrade[taget_id][origin_type] = {}
 
     exist_url = upgrade.get(taget_id).get(origin_type).get(name)
 
@@ -146,7 +140,7 @@ def init_data():
     global boss_id
     global sent_type
     global server_url
-    with open("base.json","r",encoding='UTF-8') as f:
+    with open(base_local,"r",encoding='UTF-8') as f:
         load_dic = dict(json.load(f))
         aggent_id = load_dic.get("aggent_id")
         corp_secret = load_dic.get("corp_secret")
@@ -163,7 +157,7 @@ def check_update_ready():
         origin = user.get("base")
         taget_id = user.get("user_id")
         for origin_type,v in origin.items():
-            print("源：" + str(upgrade))
+            # print("源：" + str(upgrade))
             for name,url in v.items():
                 change = query_new_chapter(url, origin_type)
                 change["name"] = name
@@ -171,11 +165,11 @@ def check_update_ready():
                 change["need"] = need
                 if change.get("ready") == True and need == True:
                     message = name + "更新：" + change.get("url")
-                    print("发送给：" + taget_id + "内容为：" + message)
+                    # print("发送给：" + taget_id + "内容为：" + message)
                     send_message(message,taget_id)
                     do_log([],message)
                 change_list.append(change)
-            print("后：" + str(upgrade))
+            # print("后：" + str(upgrade))
     do_log(change_list)
 
 def monitor():
@@ -188,14 +182,8 @@ def monitor():
             if not error:
                 send_message(str(e),boss_id)
                 error = True
-        time.sleep(15)
+        time.sleep(300)
 
 
 if __name__ == '__main__':
     monitor()
-    # data_body = {
-    #     "title":11,
-    #     "desp":222
-    # }
-    # post = requests.get("https://sctapi.ftqq.com/SCT129842TdoN56kGcwUPRwkSX0cnJ4iLb.send?title=11&desp=222")
-    # print(post.text)
