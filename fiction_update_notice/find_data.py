@@ -5,27 +5,25 @@ import json
 import time
 
 
+## 这是server酱的
+# server_url = "https://sctapi.ftqq.com/SCT129842TTF3tOQ44d69Vc5A7LYzZZqBM.send"
 
-
-base = {
-    "shuqu_ydmms":{"夜的命名术":"https://wap.shuquge.com/s/3478.html"},
-    "shuqu_lhly":{"轮回乐园":"https://wap.shuquge.com/s/73988.html"},
-    "shuqu_kbfs":{"恐怖复苏":"https://wap.shuquge.com/s/83354.html"}
+upgrade = {
+    "hyb":{
+        "shuqu":{
+            "从木叶开始逃亡":"dasdaa"
+        }
+    }
 }
-
-upgrade = {}
 
 file_name = "history.txt"
 log_name = "log.txt"
 
-## 这是server酱的
-# server_url = "https://sctapi.ftqq.com/SCT129842TTF3tOQ44d69Vc5A7LYzZZqBM.send"
-
-## 应用id
-aggent_id = 111
-corp_secret = "应用secret"
-corp_id = "企业id"
-user_id = "用户id"
+aggent_id = 0
+corp_secret = ""
+corp_id = ""
+user_id = ""
+boss_id = ""
 
 def find_content(url):
     header = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36','Connection': 'close'}
@@ -39,7 +37,7 @@ def create_md5(content):
     md5_digest = new_md5.hexdigest()
     return md5_digest
 
-def send_message(_message): # 默认发送给自己
+def send_message(_message,user_id): # 默认发送给自己
 
     response = requests.get(f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corp_id}&corpsecret={corp_secret}")
     data = json.loads(response.text)
@@ -100,27 +98,29 @@ def shu_qu_ge(url):
     return change
 
 def query_new_chapter(url,type):
-    origin = type.split("_")[0]
-    if origin == "biqu":
+    if type == "biqu":
         return bi_qu_ge(url)
-    elif origin == "shuqu":
+    elif type == "shuqu":
         return shu_qu_ge(url)
 
 
-def history_record(change):
+def history_record(change,origin_type,taget_id):
     url = change.get("url")
     ready = change.get("ready")
     name = change.get("name")
 
-    exist_url = upgrade.get(name)
+    if upgrade.get(taget_id) is None or upgrade.get(taget_id).get(origin_type) is None:
+        return False
+
+    exist_url = upgrade.get(taget_id).get(origin_type).get(name)
 
     if exist_url is None:
-        upgrade[name] = url
+        upgrade[taget_id][origin_type][name] = url
         return False
 
     if exist_url != url:
         if ready:
-            upgrade[name] = url
+            upgrade[taget_id][origin_type][name] = url
             return True
     return False
 
@@ -136,22 +136,41 @@ def do_log(change_list,message=None):
         f.write("dic -> " + str(upgrade) + "\n")
         f.flush()
 
+def init_data():
+    global aggent_id
+    global corp_secret
+    global corp_id
+    global boss_id
+    with open("base.json","r") as f:
+        load_dic = dict(json.load(f))
+        aggent_id = load_dic.get("aggent_id")
+        corp_secret = load_dic.get("corp_secret")
+        corp_id = load_dic.get("corp_id")
+        boss_id = load_dic.get("boss_id")
+        return load_dic.get("data")
 
 def check_update_ready():
     change_list = []
-    for type in base:
-        find = base.get(type)
-        name = next(iter(find))
-        change = query_new_chapter(find.get(name), type)
-        # print(change)
-        change["name"] = name
-        need = history_record(change)
-        change["need"] = need
-        if change.get("ready") == True and need == True:
-            message = name + "更新：" + change.get("url")
-            send_message(message)
-            do_log([],message)
-        change_list.append(change)
+    data = init_data()
+    for user in data:
+        origin = user.get("base")
+        taget_id = user.get("user_id")
+        for origin_type,v in origin.items():
+            print("源：" + str(upgrade))
+            for name,url in v.items():
+                # print(name + "  " + url)
+                change = query_new_chapter(url, origin_type)
+                change["name"] = name
+                need = history_record(change,origin_type,taget_id)
+                change["need"] = need
+                # print(change)
+                if change.get("ready") == True and need == True:
+                    message = name + "更新：" + change.get("url")
+                    print("发送给：" + taget_id + "内容为：" + message)
+                    send_message(message,taget_id)
+                    do_log([],message)
+                change_list.append(change)
+            print("后：" + str(upgrade))
     do_log(change_list)
 
 def monitor():
@@ -164,11 +183,13 @@ def monitor():
             #print(upgrade)
         except Exception as e:
             if not error:
-                send_message(str(e))
+                # send_message(str(e),boss_id)
+                print(str(e))
                 error = True
-        time.sleep(300)
+        time.sleep(15)
 
 
 if __name__ == '__main__':
-    monitor()
-
+    # monitor()
+    init_data()
+    send_message("aaaa","hyb")
