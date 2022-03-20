@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from hashlib import md5
 import json
 import time
+import os
 
 
 
@@ -17,6 +18,7 @@ corp_secret = ""
 corp_id = ""
 user_id = ""
 boss_id = ""
+history_time = 0
 
 def find_content(url):
     header = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36','Connection': 'close'}
@@ -170,17 +172,33 @@ def check_update_ready():
             # print("后：" + str(upgrade))
     do_log(change_list)
 
+def delete_log():
+    global history_time
+    now = time.time()
+    if history_time == 0:
+        history_time = now
+        return
+    if now - history_time > 86400:
+        if os.path.exists(log_name):
+            os.remove(log_name)
+            do_log([],"\n日志删除成功")
+        history_time = now
+        return
+
 def monitor():
     error = False
     while True:
         try:
             check_update_ready()
+            delete_log()
             error = False
         except Exception as e:
             if not error:
                 send_message(str(e),boss_id)
                 error = True
         time.sleep(300)
+
+
 
 
 if __name__ == '__main__':
